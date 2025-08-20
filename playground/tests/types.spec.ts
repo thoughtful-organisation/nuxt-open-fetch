@@ -162,3 +162,108 @@ describe('use[Client]', async () => {
     } | undefined>>()
   })
 })
+
+describe('form Data Support', async () => {
+  const $pets = createOpenFetch<paths>({})
+  const usePets = createUseOpenFetch<paths>('api')
+
+  it('supports multipart/form-data with object body', () => () => {
+    $pets('/pet/{petId}/uploadMultiple', {
+      method: 'post',
+      path: { petId: 1 },
+      body: {
+        files: ['file1', 'file2'] as any,
+        name: 'test upload',
+        description: 'test description',
+        metadata: {
+          tags: ['tag1', 'tag2'],
+          priority: 1,
+        },
+      },
+    })
+  })
+
+  it('supports multipart/form-data with FormData body', () => () => {
+    const formData = new FormData()
+    formData.append('name', 'test upload')
+    formData.append('files', new File(['content'], 'test.txt'))
+
+    $pets('/pet/{petId}/uploadMultiple', {
+      method: 'post',
+      path: { petId: 1 },
+      body: formData,
+    })
+  })
+
+  it('supports application/x-www-form-urlencoded with object body', () => () => {
+    $pets('/pet/{petId}/updateForm', {
+      method: 'post',
+      path: { petId: 1 },
+      body: {
+        name: 'Updated Pet Name',
+        status: 'available',
+        photoUrls: ['url1', 'url2'],
+      },
+    })
+  })
+
+  it('supports application/x-www-form-urlencoded with URLSearchParams body', () => () => {
+    const params = new URLSearchParams()
+    params.append('name', 'Updated Pet Name')
+    params.append('status', 'available')
+
+    $pets('/pet/{petId}/updateForm', {
+      method: 'post',
+      path: { petId: 1 },
+      body: params,
+    })
+  })
+
+  it('supports form data in composables', () => () => {
+    usePets('/pet/{petId}/uploadMultiple', {
+      method: 'post',
+      path: { petId: 1 },
+      body: {
+        files: ['file1'] as any,
+        name: 'test upload',
+      },
+      immediate: true,
+    })
+
+    usePets('/pet/{petId}/updateForm', {
+      method: 'post',
+      path: { petId: 1 },
+      body: {
+        name: 'Updated Pet Name',
+      },
+      immediate: true,
+    })
+  })
+
+  it('has correct return types for form endpoints', () => async () => {
+    const uploadResult = await $pets('/pet/{petId}/uploadMultiple', {
+      method: 'post',
+      path: { petId: 1 },
+      body: {
+        files: ['file1'] as any,
+        name: 'test upload',
+      },
+    })
+
+    expectTypeOf(uploadResult).toMatchTypeOf<{
+      code?: number
+      type?: string
+      message?: string
+    }>()
+
+    const updateResult = await $pets('/pet/{petId}/updateForm', {
+      method: 'post',
+      path: { petId: 1 },
+      body: {
+        name: 'Updated Pet Name',
+      },
+    })
+
+    expectTypeOf(updateResult).toMatchTypeOf<ReturnData>()
+  })
+})

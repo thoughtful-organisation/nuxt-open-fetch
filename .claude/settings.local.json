@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue view:*)",
+      "WebFetch(domain:openapi-ts.dev)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm dev:prepare:*)",
+      "Bash(pnpm run dev:prepare:*)",
+      "Bash(pnpm -w run dev:prepare)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm -w run typecheck)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
